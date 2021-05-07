@@ -1,0 +1,368 @@
+Joshua Moe | jmoe5@gmail.com | Programming II  
+
+Final Project
+
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6794367/  #The articles 
+Oyola, Mario G et al. “Sleep Deprivation Alters the Pituitary Stress Transcriptome in Male and Female Mice.” Frontiers in endocrinology vol. 10 676. 9 Oct. 2019, doi:10.3389/fendo.2019.00676
+
+https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP212107&o=acc_s%3Aa #short cut to srr
+
+#######
+
+sra: https://www.ncbi.nlm.nih.gov/Traces/study/?
+
+
+Starting over with paired reads.
+
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ /mnt/c/SRA_Toolkit/sratoolkit.2.9.6-1-ubuntu64/bin/fastq-dump -I --split-files SRR9602352
+2020-04-30T18:10:55 fastq-dump.2.9.6 warn: block-size in local file 131072 does not match requested value 32768
+2020-04-30T18:10:55 fastq-dump.2.9.6 warn: block-size in local file 131072 does not match requested value 32768
+2020-04-30T18:10:56 fastq-dump.2.9.6 warn: block-size in local file 131072 does not match requested value 32768
+2020-04-30T18:10:56 fastq-dump.2.9.6 warn: block-size in local file 131072 does not match requested value 32768
+2020-04-30T18:10:56 fastq-dump.2.9.6 warn: block-size in local file 131072 does not match requested value 32768
+Read 61587966 spots for SRR9602352
+Written 61587966 spots for SRR9602352
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ /mnt/c/SRA_Toolkit/sratoolkit.2.9.6-1-ubuntu64/bin/fastq-dump -I --split-files SRR9602366
+Read 23208644 spots for SRR9602366
+Written 23208644 spots for SRR9602366
+
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ ls
+GCF_000001635.26_GRCm38.p6_genomic.fna.gz  GCF_000001635.26_GRCm38.p6_genomic.gtf.gz  SRR9602352_2.fastq  SRR9602366_2.fastq  mm10.1.bt2  mm10.3.bt2  mm10.rev.1.bt2
+GCF_000001635.26_GRCm38.p6_genomic.gff.gz  SRR9602352_1.fastq                         SRR9602366_1.fastq  make_mm10.sh        mm10.2.bt2  mm10.4.bt2  mm10.rev.2.bt2
+
+#The mm10 is a prebuilt bowtie2 index for mice. Kept from previous run.
+
+#Since the read quality was good, I am skipping the trimmomatic clean up.
+
+                                bowtie2 [options]* -x <bt2-idx> {-1 <m1> -2 <m2> | -U <r> | --interleaved <i> | --sra-acc <acc> | b <bam>} -S [<sam>]
+
+
+
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ bowtie2 -x mm10 -1 SRR9602366_1.fastq -2 SRR9602366_2.fastq -S SRR9602366.sam
+23208644 reads; of these:
+  23208644 (100.00%) were paired; of these:
+    8208022 (35.37%) aligned concordantly 0 times
+    11521690 (49.64%) aligned concordantly exactly 1 time
+    3478932 (14.99%) aligned concordantly >1 times
+    ----
+    8208022 pairs aligned concordantly 0 times; of these:
+      2246886 (27.37%) aligned discordantly 1 time
+    ----
+    5961136 pairs aligned 0 times concordantly or discordantly; of these:
+      11922272 mates make up the pairs; of these:
+        6251490 (52.44%) aligned 0 times
+        4840944 (40.60%) aligned exactly 1 time
+        829838 (6.96%) aligned >1 times
+86.53% overall alignment rate
+
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ bowtie2 -x mm10 -1 SRR9602352_1.fastq -2 SRR9602352_2.fastq -S SRR9602352.sam
+61587966 reads; of these:
+  61587966 (100.00%) were paired; of these:
+    23154379 (37.60%) aligned concordantly 0 times
+    29915350 (48.57%) aligned concordantly exactly 1 time
+    8518237 (13.83%) aligned concordantly >1 times
+    ----
+    23154379 pairs aligned concordantly 0 times; of these:
+      6742987 (29.12%) aligned discordantly 1 time
+    ----
+    16411392 pairs aligned 0 times concordantly or discordantly; of these:
+      32822784 mates make up the pairs; of these:
+        17064530 (51.99%) aligned 0 times
+        13444502 (40.96%) aligned exactly 1 time
+        2313752 (7.05%) aligned >1 times
+86.15% overall alignment rate
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ featureCounts -a GCF_000001635.26_GRCm38.p6_genomic.gtf -o mm10.counts SRR9602352.sam SRR9602366.sam
+
+        ==========     _____ _    _ ____  _____  ______          _____
+        =====         / ____| |  | |  _ \|  __ \|  ____|   /\   |  __ \
+          =====      | (___ | |  | | |_) | |__) | |__     /  \  | |  | |
+            ====      \___ \| |  | |  _ <|  _  /|  __|   / /\ \ | |  | |
+              ====    ____) | |__| | |_) | | \ \| |____ / ____ \| |__| |
+        ==========   |_____/ \____/|____/|_|  \_\______/_/    \_\_____/
+          v1.6.0
+
+//========================== featureCounts setting ===========================\\
+||                                                                            ||
+||             Input files : 2 SAM files                                      ||
+||                           P SRR9602352.sam                                 ||
+||                           P SRR9602366.sam                                 ||
+||                                                                            ||
+||             Output file : mm10.counts                                      ||
+||                 Summary : mm10.counts.summary                              ||
+||              Annotation : GCF_000001635.26_GRCm38.p6_genomic.gtf (GTF)     ||
+||      Dir for temp files : ./                                               ||
+||                                                                            ||
+||                 Threads : 1                                                ||
+||                   Level : meta-feature level                               ||
+||              Paired-end : no                                               ||
+||         Strand specific : no                                               ||
+||      Multimapping reads : not counted                                      ||
+|| Multi-overlapping reads : not counted                                      ||
+||   Min overlapping bases : 1                                                ||
+||                                                                            ||
+\\===================== http://subread.sourceforge.net/ ======================//
+
+//================================= Running ==================================\\
+||                                                                            ||
+|| Load annotation file GCF_000001635.26_GRCm38.p6_genomic.gtf ...            ||
+||    Features : 1389889                                                      ||
+||    Meta-features : 42454                                                   ||
+||    Chromosomes/contigs : 209                                               ||
+||                                                                            ||
+|| Process SAM file SRR9602352.sam...                                         ||
+||    Paired-end reads are included.                                          ||
+||    Assign reads to features...                                             ||
+||    Total reads : 123175932                                                 ||
+||    Successfully assigned reads : 0 (0.0%)                                  ||
+||    Running time : 11.01 minutes                                            ||
+||                                                                            ||
+|| Process SAM file SRR9602366.sam...                                         ||
+||    Paired-end reads are included.                                          ||
+||    Assign reads to features...                                             ||
+||    Total reads : 46417288                                                  ||
+||    Successfully assigned reads : 0 (0.0%)                                  ||
+||    Running time : 2.94 minutes                                             ||
+||                                                                            ||
+||                         Read assignment finished.                          ||
+||                                                                            ||
+|| Summary of counting results can be found in file "mm10.counts.summary"     ||
+||                                                                            ||
+\\===================== http://subread.sourceforge.net/ ======================//
+
+#### This was obviously an error. Luckily, I figured out what went wrong. The mm10 bowtie2-indexes used the reference genome from Ensemble, so I download the gtf file from Ensemble
+#### and reran the program. 
+#### ftp://ftp.ensembl.org/pub/release-100/gtf/mus_musculus/
+####     GTF: Mus_musculus.GRCm38.100.gtf
+ 
+ joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ featureCounts -a Mus_musculus.GRCm38.100.gtf -o mm10v2.counts SRR9602352.sam SRR9602366.sam
+
+        ==========     _____ _    _ ____  _____  ______          _____
+        =====         / ____| |  | |  _ \|  __ \|  ____|   /\   |  __ \
+          =====      | (___ | |  | | |_) | |__) | |__     /  \  | |  | |
+            ====      \___ \| |  | |  _ <|  _  /|  __|   / /\ \ | |  | |
+              ====    ____) | |__| | |_) | | \ \| |____ / ____ \| |__| |
+        ==========   |_____/ \____/|____/|_|  \_\______/_/    \_\_____/
+          v1.6.0
+
+//========================== featureCounts setting ===========================\\
+||                                                                            ||
+||             Input files : 2 SAM files                                      ||
+||                           P SRR9602352.sam                                 ||
+||                           P SRR9602366.sam                                 ||
+||                                                                            ||
+||             Output file : mm10v2.counts                                    ||
+||                 Summary : mm10v2.counts.summary                            ||
+||              Annotation : Mus_musculus.GRCm38.100.gtf (GTF)                ||
+||      Dir for temp files : ./                                               ||
+||                                                                            ||
+||                 Threads : 1                                                ||
+||                   Level : meta-feature level                               ||
+||              Paired-end : no                                               ||
+||         Strand specific : no                                               ||
+||      Multimapping reads : not counted                                      ||
+|| Multi-overlapping reads : not counted                                      ||
+||   Min overlapping bases : 1                                                ||
+||                                                                            ||
+\\===================== http://subread.sourceforge.net/ ======================//
+
+//================================= Running ==================================\\
+||                                                                            ||
+|| Load annotation file Mus_musculus.GRCm38.100.gtf ...                       ||
+||    Features : 843712                                                       ||
+||    Meta-features : 55487                                                   ||
+||    Chromosomes/contigs : 45                                                ||
+||                                                                            ||
+|| Process SAM file SRR9602352.sam...                                         ||
+||    Paired-end reads are included.                                          ||
+||    Assign reads to features...                                             ||
+||    Total reads : 123175932                                                 ||
+||    Successfully assigned reads : 87761090 (71.2%)                          ||
+||    Running time : 11.50 minutes                                            ||
+||                                                                            ||
+|| Process SAM file SRR9602366.sam...                                         ||
+||    Paired-end reads are included.                                          ||
+||    Assign reads to features...                                             ||
+||    Total reads : 46417288                                                  ||
+||    Successfully assigned reads : 33085681 (71.3%)                          ||
+||    Running time : 3.24 minutes                                             ||
+||                                                                            ||
+||                         Read assignment finished.                          ||
+||                                                                            ||
+|| Summary of counting results can be found in file "mm10v2.counts.summary"   ||
+||                                                                            ||
+\\===================== http://subread.sourceforge.net/ ======================//
+
+
+### This as you can see above, fixed the featureCounts issue.
+
+
+
+
+
+
+######################## BELOW ARE MY NOTES FROM MY FIRST ATTEMPT. IT WILL SHOW MY QUALITY TRIMMING OF MY READS AS WELL AS MY FAILED BOWTIE BUILD #############################################################################
+
+
+
+
+
+
+
+
+
+
+
+female_Home_Cage_Control_No_Restraint
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ /mnt/c/SRA_Toolkit/sratoolkit.2.9.6-1-ubuntu64/bin/fastq-dump -A SRR9602352
+2020-04-27T18:38:26 fastq-dump.2.9.6 warn: block-size in local file 131072 does not match requested value 32768
+2020-04-27T18:38:26 fastq-dump.2.9.6 warn: block-size in local file 131072 does not match requested value 32768
+2020-04-27T18:38:27 fastq-dump.2.9.6 warn: block-size in local file 131072 does not match requested value 32768
+2020-04-27T18:38:27 fastq-dump.2.9.6 warn: block-size in local file 131072 does not match requested value 32768
+2020-04-27T18:38:28 fastq-dump.2.9.6 warn: block-size in local file 131072 does not match requested value 32768
+2020-04-27T18:46:12 fastq-dump.2.9.6 sys: timeout exhausted while reading file within network system module - mbedtls_ssl_read returned -76 ( NET - Reading information from the socket failed )
+2020-04-27T18:47:12 fastq-dump.2.9.6 sys: timeout exhausted while reading file within network system module - mbedtls_ssl_read returned -76 ( NET - Reading information from the socket failed )
+2020-04-27T18:47:59 fastq-dump.2.9.6 sys: timeout exhausted while reading file within network system module - mbedtls_ssl_read returned -76 ( NET - Reading information from the socket failed )
+2020-04-27T19:06:22 fastq-dump.2.9.6 sys: timeout exhausted while reading file within network system module - mbedtls_ssl_read returned -76 ( NET - Reading information from the socket failed )
+Read 61587966 spots for SRR9602352
+Written 61587966 spots for SRR9602352
+
+
+female_12h_Sleep_Deprivation_No_Restraint
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ /mnt/c/SRA_Toolkit/sratoolkit.2.9.6-1-ubuntu64/bin/fastq-dump -A SRR9602366
+Read 23208644 spots for SRR9602366
+Written 23208644 spots for SRR9602366
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ ls
+GCF_000001635.26_GRCm38.p6_genomic.fna.gz  GCF_000001635.26_GRCm38.p6_genomic.gtf.gz  SRR9602366.fastq
+GCF_000001635.26_GRCm38.p6_genomic.gff.gz  SRR9602352.fastq
+
+
+################################################################################################################################################################################################
+
+
+This is where I got the GTF, GFF, and ref sequences:
+https://www.ncbi.nlm.nih.gov/genome/?term=txid10090[Organism:exp]
+
+
+###Cleaning up the reads by cutting off the ends if the quality score falls below 20
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ java -jar /mnt/c/UNC_Spring_2019/Genomics/Trimmomatic-0.38/trimmomatic-0.38.jar SE SRR9602366.fastq SRR9602366.trail.fastq TRAILING:20
+TrimmomaticSE: Started with arguments:
+ SRR9602366.fastq SRR9602366.trail.fastq TRAILING:20
+Automatically using 4 threads
+Quality encoding detected as phred33
+Input Reads: 23208644 Surviving: 23127580 (99.65%) Dropped: 81064 (0.35%)
+TrimmomaticSE: Completed successfully
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ java -jar /mnt/c/UNC_Spring_2019/Genomics/Trimmomatic-0.38/trimmomatic-0.38.jar SE SRR9602352.fastq SRR9602352.trail.fastq TRAILING:20
+TrimmomaticSE: Started with arguments:
+ SRR9602352.fastq SRR9602352.trail.fastq TRAILING:20
+Automatically using 4 threads
+Quality encoding detected as phred33
+Input Reads: 61587966 Surviving: 61525733 (99.90%) Dropped: 62233 (0.10%)
+TrimmomaticSE: Completed successfully
+
+###Now using bowtie2 to align reads to a reference genome/
+
+
+
+######################################################################################## Possible error ####################################################################################################
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ bowtie2-build GCF_000001635.26_GRCm38.p6_genomic.fna.gz GCF_000001635_index_bowtie
+Settings:
+  Output files: "GCF_000001635_index_bowtie.*.bt2"
+  Line rate: 6 (line is 64 bytes)
+  Lines per side: 1 (side is 64 bytes)
+  Offset rate: 4 (one in 16)
+  FTable chars: 10
+  Strings: unpacked
+  Max bucket size: default
+  Max bucket size, sqrt multiplier: default
+  Max bucket size, len divisor: 4
+  Difference-cover sample period: 1024
+  Endianness: little
+  Actual local endianness: little
+  Sanity checking: disabled
+  Assertions: disabled
+  Random seed: 0
+  Sizeofs: void*:8, int:4, long:8, size_t:8
+Input files DNA, FASTA:
+  GCF_000001635.26_GRCm38.p6_genomic.fna.gz
+Building a SMALL index
+Reading reference sizes
+  Time reading reference sizes: 00:00:46
+Calculating joined length
+Writing header
+Reserving space for joined string
+Joining reference sequences
+  Time to join reference sequences: 00:00:28
+bmax according to bmaxDivN setting: 684884673
+Using parameters --bmax 513663505 --dcv 1024
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 513663505 --dcv 1024
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:01:34
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:21
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:37
+  Sanity-checking and returning
+Building samples
+Reserving space for 12 sample suffixes
+Generating random suffixes
+QSorting 12 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 12 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 2.73954e+09 (target: 513663504)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ ls
+GCF_000001635.26_GRCm38.p6_genomic.fna.gz  GCF_000001635.26_GRCm38.p6_genomic.gtf.gz  GCF_000001635_index_bowtie.2.bt2  GCF_000001635_index_bowtie.4.bt2  SRR9602366.trail.fastq
+GCF_000001635.26_GRCm38.p6_genomic.gff.gz  GCF_000001635_index_bowtie.1.bt2           GCF_000001635_index_bowtie.3.bt2  SRR9602352.trail.fastq
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ bowtie2 -x GCF_000001635_index_bowtie -U SRR9602366.trail.fastq -S SRR9602366.sam
+Could not open index file GCF_000001635_index_bowtie.rev.1.bt2
+Could not open index file GCF_000001635_index_bowtie.rev.2.bt2
+Segmentation fault (core dumped)
+(ERR): bowtie2-align exited with value 139
+
+
+###########################################################################################################################################################################
+
+Solution
+
+I went to this website to download prebuilt bowtie2-build indexes: http://bowtie-bio.sourceforge.net/bowtie2/index.shtml .
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ ls
+GCF_000001635.26_GRCm38.p6_genomic.fna.gz  GCF_000001635.26_GRCm38.p6_genomic.gtf.gz  SRR9602366.trail.fastq  mm10.1.bt2  mm10.3.bt2  mm10.rev.1.bt2
+GCF_000001635.26_GRCm38.p6_genomic.gff.gz  SRR9602352.trail.fastq                     make_mm10.sh            mm10.2.bt2  mm10.4.bt2  mm10.rev.2.bt2
+
+joshua@TeleahLaptop:/mnt/c/UNC_Spring_2020/BINF_Programming_II/Projects/SRA_data$ bowtie2 -x mm10 -U SRR9602352.trail.fastq -S SRR9602352.sam 
+61525733 reads; of these:
+  61525733 (100.00%) were unpaired; of these:
+    61523656 (100.00%) aligned 0 times
+    1875 (0.00%) aligned exactly 1 time
+    202 (0.00%) aligned >1 times
+0.00% overall alignment rate
+
+
+######################################################################################################################################################################################3
